@@ -1,5 +1,5 @@
 const eventWindows = [
-  { start: "15:10", end: "15:20", name: "ENGLISH TE 1 ⏳09:30AM - 10:30AM KST" },
+  { start: "15:15", end: "15:20", name: "ENGLISH TE 1 ⏳09:30AM - 10:30AM KST" },
     { start: "15:20", end: "15:30", name: "KOREAN/JAPANESE/VIETNAMESE TE 1 ⏳12:45PM - 01:45PM KST" },
     { start: "15:30", end: "15:40", name: "CHINESE TE 1 ⏳01:45PM - 02:45PM KST" },
     { start: "18:30", end: "19:30", name: "KOREAN/JAPANESE/VIETNAMESE TE 2 ⏳06:30PM - 07:30PM KST" },
