@@ -110,52 +110,83 @@
   <footer>
     &copy; DALLYEORA VOTING TEAM
   </footer>
+<!-- Firebase SDKs -->
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-messaging-compat.js"></script>
 
 <script>
-  import { initializeApp } from "firebase/app";
-
-const firebaseConfig = {
-  apiKey: "AIzaSyBJke8bTezlolxCsrBzRiGmN7MawREkyLI",
+  // Replace with your own config from Firebase Console
+  const firebaseConfig = {
+    apiKey: "AIzaSyBJke8bTezlolxCsrBzRiGmN7MawREkyLI",
   authDomain: "timeevent-cf4f6.firebaseapp.com",
   projectId: "timeevent-cf4f6",
   storageBucket: "timeevent-cf4f6.firebasestorage.app",
   messagingSenderId: "421978030703",
   appId: "1:421978030703:web:42e115a9c252ba23d5439a"
 };
-const app = initializeApp(firebaseConfig);
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('sw.js')
-      .then(reg => console.log('[SW] Registered'))
-      .catch(err => console.error('[SW] Failed', err));
-  }
 
-  
-  let notificationEnabled = false;
+  firebase.initializeApp(firebaseConfig);
+  const messaging = firebase.messaging();
 
   function requestNotificationPermission() {
     Notification.requestPermission().then(permission => {
       if (permission === "granted") {
-        notificationEnabled = true;
-        alert("Notifications enabled!");
-      } else {
-        alert("Please enable notifications to receive alerts.");
+        messaging.getToken({ vapidKey: 'YOUR_PUBLIC_VAPID_KEY_FROM_FIREBASE' })
+          .then((currentToken) => {
+            if (currentToken) {
+              console.log('FCM Token:', currentToken);
+              alert("Notifications enabled!");
+              notificationEnabled = true;
+              // Optionally send token to your backend
+            } else {
+              console.warn('No registration token available');
+            }
+          })
+          .catch((err) => {
+            console.error('Error retrieving token. ', err);
+          });
       }
     });
   }
 
-  
+  messaging.onMessage(payload => {
+    console.log('Message received. ', payload);
+    if (Notification.permission === "granted") {
+      navigator.serviceWorker.getRegistration().then(reg => {
+        if (reg) {
+          const { title, body, icon } = payload.notification;
+          reg.showNotification(title, { body, icon });
+        }
+      });
+    }
+  });
+
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('sw.js')
+      .then(reg => console.log('Service Worker registered', reg))
+      .catch(err => console.error('SW registration failed', err));
+  }
+
   const timezoneInfo = document.getElementById("timezone-info");
   const activeEvent = document.getElementById("active-event");
   const countdown = document.getElementById("countdown");
   const nextEventsDiv = document.getElementById("next-events");
 
-  
+  function updateTimezoneInfo() {
+    const now = new Date();
+    const kstNow = new Date(now.toLocaleString("en-US", { timeZone: "Asia/Seoul" }));
+    timezoneInfo.innerHTML = `Your Timezone: ${Intl.DateTimeFormat().resolvedOptions().timeZone}<br>KST Now: ${kstNow.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true })}`;
+  }
+
+  updateTimezoneInfo();
+  setInterval(updateTimezoneInfo, 60000);
+
+  let notificationEnabled = false;
+
   const eventWindows = [
     { start: "09:30", end: "10:30", name: "ENGLISH TE 1 ⏳09:30AM - 10:30AM KST" },
     { start: "12:45", end: "13:45", name: "KOREAN/JAPANESE/VIETNAMESE TE 1 ⏳12:45PM - 01:45PM KST" },
-    { start: "16:40", end: "16:45", name: "CHINESE TE 1 ⏳01:45PM - 02:45PM KST" },
+    { start: "13:45", end: "14:45", name: "CHINESE TE 1 ⏳01:45PM - 02:45PM KST" },
     { start: "18:30", end: "19:30", name: "KOREAN/JAPANESE/VIETNAMESE TE 2 ⏳06:30PM - 07:30PM KST" },
     { start: "19:30", end: "20:30", name: "CHINESE TE 2 ⏳07:30PM - 08:30PM KST" },
     { start: "22:50", end: "23:50", name: "ENGLISH TE 2 ⏳10:50PM - 11:50PM KST" }
@@ -163,20 +194,11 @@ const app = initializeApp(firebaseConfig);
 
   const notifiedToday = new Set();
 
- 
   function getKSTNow() {
     const now = new Date();
     return new Date(now.toLocaleString("en-US", { timeZone: "Asia/Seoul" }));
   }
 
-  
-  function updateTimezoneInfo() {
-    const now = new Date();
-    const kstNow = getKSTNow();
-    timezoneInfo.innerHTML = `Your Timezone: ${Intl.DateTimeFormat().resolvedOptions().timeZone}<br>KST Now: ${kstNow.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true })}`;
-  }
-
-  
   function updateCountdown(kstNow) {
     nextEventsDiv.innerHTML = "";
     const upcoming = eventWindows.map(event => {
@@ -199,22 +221,21 @@ const app = initializeApp(firebaseConfig);
     }
   }
 
-  
   function checkEvents() {
-    const today = new Date().toISOString().split('T')[0];
+    const now = new Date();
+    const today = now.toISOString().slice(0, 10);
     const kstNow = getKSTNow();
-    const hhmm = kstNow.getHours().toString().padStart(2, '0') + ':' + kstNow.getMinutes().toString().padStart(2, '0');
+    const kstTime = kstNow.getHours().toString().padStart(2, '0') + ":" + kstNow.getMinutes().toString().padStart(2, '0');
 
-    let eventActive = false;
-
+    let eventFound = false;
     for (const event of eventWindows) {
-      if (hhmm >= event.start && hhmm < event.end) {
-        activeEvent.innerHTML = `<img class='alarm' src='https://i.gifer.com/ZZ5H.gif' alt='alarm'/> ${event.name}`;
-        const key = today + event.start;
-        if (!notifiedToday.has(key)) {
-          notifiedToday.add(key);
-          if (Notification.permission === 'granted') {
-            navigator.serviceWorker.getRegistration().then(reg => {
+      if (kstTime >= event.start && kstTime < event.end) {
+        activeEvent.innerHTML = `<img class='alarm' src='https://i.gifer.com/ZZ5H.gif' alt='alarm'/>${event.name}`;
+        eventFound = true;
+        if (!notifiedToday.has(today + event.start)) {
+          notifiedToday.add(today + event.start);
+          if (notificationEnabled && 'serviceWorker' in navigator) {
+            navigator.serviceWorker.getRegistration().then(function(reg) {
               if (reg) {
                 reg.showNotification("⏰ Time Event Reminder (KST)", {
                   body: `${event.name}`,
@@ -227,21 +248,17 @@ const app = initializeApp(firebaseConfig);
             });
           }
         }
-        eventActive = true;
         break;
       }
     }
-
-    if (!eventActive) {
+    if (!eventFound) {
       activeEvent.textContent = "Time Event Alert";
     }
-
     updateCountdown(kstNow);
   }
 
-
-  updateTimezoneInfo();
-  checkEvents();
-  setInterval(updateTimezoneInfo, 60000);
   setInterval(checkEvents, 1000);
+  checkEvents();
 </script>
+</body>
+</html>
