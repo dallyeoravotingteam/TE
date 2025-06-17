@@ -110,24 +110,9 @@
   <footer>
     &copy; DALLYEORA VOTING TEAM
   </footer>
-<!-- Firebase SDKs -->
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-messaging-compat.js"></script>
 
 <script>
-  // Replace with your own config from Firebase Console
-  const firebaseConfig = {
-    apiKey: "AIzaSyBJke8bTezlolxCsrBzRiGmN7MawREkyLI",
-  authDomain: "timeevent-cf4f6.firebaseapp.com",
-  projectId: "timeevent-cf4f6",
-  storageBucket: "timeevent-cf4f6.firebasestorage.app",
-  messagingSenderId: "421978030703",
-  appId: "1:421978030703:web:42e115a9c252ba23d5439a"
-};
-
-  firebase.initializeApp(firebaseConfig);
-  const messaging = firebase.messaging();
-
+  
   function requestNotificationPermission() {
     Notification.requestPermission().then(permission => {
       if (permission === "granted") {
