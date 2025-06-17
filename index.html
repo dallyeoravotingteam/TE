@@ -71,6 +71,44 @@
   </footer>
 
   <script>
+  // Register service worker
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('sw.js')
+      .then(reg => console.log('[SW] Registered'))
+      .catch(err => console.error('[SW] Failed', err));
+  }
+
+  // Ask permission
+  function requestNotificationPermission() {
+    Notification.requestPermission().then(permission => {
+      if (permission === "granted") {
+        console.log("Notification permission granted.");
+      } else {
+        alert("Please allow notifications in your browser settings.");
+      }
+    });
+  }
+
+  requestNotificationPermission();
+
+  // Test notification every 30s
+  setInterval(() => {
+    if (Notification.permission === "granted") {
+      navigator.serviceWorker.getRegistration().then(reg => {
+        if (reg) {
+          reg.showNotification("🔔 Test Notification", {
+            body: "This is a test at " + new Date().toLocaleTimeString(),
+            icon: "https://cdn-icons-png.flaticon.com/512/1827/1827392.png",
+            vibrate: [200, 100, 200]
+          });
+        }
+      });
+    }
+  }, 30000);
+</script>
+
+
+  <script>
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('sw.js')
       .then(reg => console.log('Service Worker registered', reg))
