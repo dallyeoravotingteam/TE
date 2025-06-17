@@ -2,13 +2,13 @@ importScripts('https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js
 importScripts('https://www.gstatic.com/firebasejs/10.12.2/firebase-messaging-compat.js');
 
 firebase.initializeApp({
-  apiKey: "AIza...",
-  authDomain: "yourproject.firebaseapp.com",
-  projectId: "yourproject",
-  storageBucket: "yourproject.appspot.com",
-  messagingSenderId: "123456789",
-  appId: "1:123456789:web:abcd1234"
-});
+  apiKey: "AIzaSyBJke8bTezlolxCsrBzRiGmN7MawREkyLI",
+  authDomain: "timeevent-cf4f6.firebaseapp.com",
+  projectId: "timeevent-cf4f6",
+  storageBucket: "timeevent-cf4f6.firebasestorage.app",
+  messagingSenderId: "421978030703",
+  appId: "1:421978030703:web:42e115a9c252ba23d5439a"
+};
 
 const messaging = firebase.messaging();
 
