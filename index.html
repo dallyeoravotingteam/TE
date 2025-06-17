@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Time Event Notifications</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Fredoka+One&display=swap');
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: 'Fredoka One', cursive;
+      background-color: #c150e2;
+      color: white;
+      text-align: center;
+    }
+
+    .container {
+      background-color: #d47ce2;
+      margin: 2rem;
+      padding: 2rem;
+      border-radius: 1rem;
+      position: relative;
+    }
+
+    h1, h2 {
+      margin-bottom: 1rem;
+    }
+
+    .event {
+      margin: 1rem auto;
+      font-size: 1.5rem;
+    }
+
+    .alarm {
+      width: 50px;
+      vertical-align: middle;
+      margin-right: 10px;
+    }
+
+    .top-left {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+    }
+
+    button {
+      font-family: 'Fredoka One', cursive;
+      background-color: #a838a7;
+      color: white;
+      border: none;
+      padding: 0.75rem 1.5rem;
+      font-size: 1rem;
+      border-radius: 1rem;
+      cursor: pointer;
+    }
+
+    footer {
+      margin-top: 3rem;
+      padding: 1rem;
+      background-color: #a838a7;
+      font-size: 0.9rem;
+    }
+
+    #timezone-info {
+      margin-bottom: 1rem;
+    }
+
+    .countdown-line {
+      font-size: 1rem;
+      margin: 0.5rem 0;
+    }
+
+    @media screen and (max-width: 600px) {
+      .container {
+        margin: 1rem;
+        padding: 1.5rem;
+      }
+
+      .event {
+        font-size: 1.25rem;
+      }
+
+      .alarm {
+        width: 40px;
+      }
+
+      button.top-left {
+        padding: 0.5rem 1rem;
+        font-size: 0.9rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <button class="top-left" onclick="requestNotificationPermission()">Enable Notifications</button>
+    <h1>📢 Daily Time Events</h1>
+    <div id="timezone-info"></div>
+
+    <div class="event" id="active-event">Time Event Alert</div>
+    <div id="countdown"></div>
+    <div id="next-events"></div>
+  </div>
+
+  <footer>
+    &copy; DALLYEORA VOTING TEAM
+  </footer>
+
+  <script>
+    const timezoneInfo = document.getElementById("timezone-info");
+    const activeEvent = document.getElementById("active-event");
+    const countdown = document.getElementById("countdown");
+    const nextEventsDiv = document.getElementById("next-events");
+
+    function updateTimezoneInfo() {
+      const now = new Date();
+      const kstNow = new Date(now.toLocaleString("en-US", { timeZone: "Asia/Seoul" }));
+      timezoneInfo.innerHTML = `Your Timezone: ${Intl.DateTimeFormat().resolvedOptions().timeZone}<br>KST Now: ${kstNow.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true })}`;
+    }
+
+    updateTimezoneInfo();
+    setInterval(updateTimezoneInfo, 60000);
+
+    let notificationEnabled = false;
+
+    function requestNotificationPermission() {
+      Notification.requestPermission().then(permission => {
+        if (permission === "granted") {
+          notificationEnabled = true;
+          alert("Notifications enabled!");
+        }
+      });
+    }
+
+    const eventWindows = [
+      { start: "09:30", end: "10:30", name: "ENGLISH TE 1 ⏳09:30AM - 10:30AM KST" },
+      { start: "12:45", end: "13:45", name: "KOREAN/JAPANESE/VIETNAMESE TE 1 ⏳12:45PM - 01:45PM KST" },
+      { start: "13:45", end: "14:45", name: "CHINESE TE 1 ⏳01:45PM - 02:45PM KST" },
+      { start: "18:30", end: "19:30", name: "KOREAN/JAPANESE/VIETNAMESE TE 2 ⏳06:30PM - 07:30PM KST" },
+      { start: "19:30", end: "20:30", name: "CHINESE TE 2 ⏳07:30PM - 08:30PM KST" },
+      { start: "22:50", end: "23:50", name: "ENGLISH TE 2 ⏳10:50PM - 11:50PM KST" }
+    ];
+
+    const notifiedToday = new Set();
+
+    function getKSTNow() {
+      const now = new Date();
+      return new Date(now.toLocaleString("en-US", { timeZone: "Asia/Seoul" }));
+    }
+
+    function updateCountdown(kstNow) {
+      nextEventsDiv.innerHTML = "";
+      const upcoming = eventWindows.map(event => {
+        const [h, m] = event.start.split(":");
+        const startDate = new Date(kstNow);
+        startDate.setHours(+h, +m, 0);
+        const diff = startDate - kstNow;
+        return diff > 0 ? { diff, event } : null;
+      }).filter(e => e !== null).sort((a, b) => a.diff - b.diff);
+
+      if (upcoming.length > 0) {
+        const { diff, event } = upcoming[0];
+        const totalSecs = Math.floor(diff / 1000);
+        const hrs = Math.floor(totalSecs / 3600);
+        const mins = Math.floor((totalSecs % 3600) / 60);
+        const secs = totalSecs % 60;
+        countdown.textContent = `Next: ${event.name} in ${hrs}h ${mins}m ${secs}s`;
+      } else {
+        countdown.textContent = "No upcoming events today.";
+      }
+    }
+
+    function checkEvents() {
+      const now = new Date();
+      const today = now.toISOString().slice(0, 10);
+      const kstNow = getKSTNow();
+      const kstTime = kstNow.getHours().toString().padStart(2, '0') + ":" + kstNow.getMinutes().toString().padStart(2, '0');
+
+      let eventFound = false;
+      for (const event of eventWindows) {
+        if (kstTime >= event.start && kstTime < event.end) {
+          activeEvent.innerHTML = `<img class='alarm' src='https://i.gifer.com/ZZ5H.gif' alt='alarm'/>${event.name}`;
+          eventFound = true;
+          if (!notifiedToday.has(today + event.start)) {
+            notifiedToday.add(today + event.start);
+            if (notificationEnabled) {
+              new Notification("⏰ Time Event Reminder (KST)", {
+                body: `${event.name}`,
+                icon: 'https://cdn-icons-png.flaticon.com/512/1827/1827392.png'
+              });
+            }
+          }
+          break;
+        }
+      }
+      if (!eventFound) {
+        activeEvent.textContent = "Time Event Alert";
+      }
+      updateCountdown(kstNow);
+    }
+
+    setInterval(checkEvents, 1000);
+    checkEvents();
+  </script>
+</body>
+</html>

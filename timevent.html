@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Time Event Notifications</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Fredoka+One&display=swap');
+
+    body {
+      margin: 0;
+      font-family: 'Fredoka One', cursive;
+      background-color: #c150e2;
+      color: white;
+      text-align: center;
+    }
+
+    .container {
+      background-color: #d47ce2;
+      margin: 2rem;
+      padding: 2rem;
+      border-radius: 1rem;
+    }
+
+    h1, h2 {
+      margin-bottom: 1rem;
+    }
+
+    .event {
+      margin: 1rem auto;
+      font-size: 1.5rem;
+    }
+
+    button {
+      font-family: 'Fredoka One', cursive;
+      background-color: #a838a7;
+      color: white;
+      border: none;
+      padding: 0.75rem 1.5rem;
+      font-size: 1rem;
+      border-radius: 1rem;
+      cursor: pointer;
+      margin-top: 1rem;
+    }
+
+    footer {
+      margin-top: 3rem;
+      padding: 1rem;
+      background-color: #a838a7;
+      font-size: 0.9rem;
+    }
+
+    #timezone-info {
+      margin-bottom: 1rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>📢 Daily Time Events</h1>
+    <div id="timezone-info"></div>
+
+    <div class="event" id="active-event">Time Event Alert</div>
+
+    <h2>🔔 Notification Settings</h2>
+    <button onclick="requestNotificationPermission()">Enable Notifications</button>
+  </div>
+
+  <footer>
+    &copy; DALLYEORA VOTING TEAM
+  </footer>
+
+  <script>
+    const timezoneInfo = document.getElementById("timezone-info");
+    const activeEvent = document.getElementById("active-event");
+    timezoneInfo.innerHTML = `Your Timezone: ${Intl.DateTimeFormat().resolvedOptions().timeZone}<br>KST Now: ${new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true, timeZone: 'Asia/Seoul' })}`;
+
+    let notificationEnabled = false;
+
+    function requestNotificationPermission() {
+      Notification.requestPermission().then(permission => {
+        if (permission === "granted") {
+          notificationEnabled = true;
+          alert("Notifications enabled!");
+        }
+      });
+    }
+
+    const eventSchedule = {
+      "09:30": "ENGLISH TE 1 ⏳09:30AM - 10:30AM KST",
+      "12:45": "KOREAN/JAPANESE/VIETNAMESE TE 1 ⏳12:45PM - 01:45PM KST",
+      "13:45": "CHINESE TE 1 ⏳01:45PM - 02:45PM KST",
+      "18:30": "KOREAN/JAPANESE/VIETNAMESE TE 2 ⏳06:30PM - 07:30PM KST",
+      "19:30": "CHINESE TE 2 ⏳07:30PM - 08:30PM KST",
+      "22:50": "ENGLISH TE 2 ⏳10:50PM - 11:50PM KST"
+    };
+
+    const notifiedToday = new Set();
+
+    function checkEvents() {
+      const now = new Date();
+      const today = now.toISOString().slice(0, 10);
+      const kstNow = new Date(now.toLocaleString("en-US", { timeZone: "Asia/Seoul" }));
+      const timeStr = kstNow.toTimeString().slice(0,5);
+
+      if (eventSchedule[timeStr]) {
+        activeEvent.textContent = eventSchedule[timeStr];
+
+        if (!notifiedToday.has(today + timeStr)) {
+          notifiedToday.add(today + timeStr);
+          if (notificationEnabled) {
+            new Notification("⏰ Time Event Reminder (KST)", {
+              body: `It's ${timeStr} KST. ${eventSchedule[timeStr]}`,
+              icon: 'https://cdn-icons-png.flaticon.com/512/1827/1827392.png'
+            });
+          }
+        }
+      } else {
+        activeEvent.textContent = "Time Event Alert";
+      }
+    }
+
+    setInterval(checkEvents, 60000); // check every 1 min
+    checkEvents();
+  </script>
+</body>
+</html>
