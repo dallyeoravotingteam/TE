@@ -110,13 +110,16 @@
   <footer>
     &copy; DALLYEORA VOTING TEAM
   </footer>
+
 <script>
+  
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('sw.js')
       .then(reg => console.log('[SW] Registered'))
       .catch(err => console.error('[SW] Failed', err));
   }
 
+  
   let notificationEnabled = false;
 
   function requestNotificationPermission() {
@@ -130,6 +133,13 @@
     });
   }
 
+  
+  const timezoneInfo = document.getElementById("timezone-info");
+  const activeEvent = document.getElementById("active-event");
+  const countdown = document.getElementById("countdown");
+  const nextEventsDiv = document.getElementById("next-events");
+
+  
   const eventWindows = [
     { start: "09:30", end: "10:30", name: "ENGLISH TE 1 ⏳09:30AM - 10:30AM KST" },
     { start: "12:45", end: "13:45", name: "KOREAN/JAPANESE/VIETNAMESE TE 1 ⏳12:45PM - 01:45PM KST" },
@@ -141,18 +151,53 @@
 
   const notifiedToday = new Set();
 
+ 
   function getKSTNow() {
     const now = new Date();
     return new Date(now.toLocaleString("en-US", { timeZone: "Asia/Seoul" }));
   }
 
+  
+  function updateTimezoneInfo() {
+    const now = new Date();
+    const kstNow = getKSTNow();
+    timezoneInfo.innerHTML = `Your Timezone: ${Intl.DateTimeFormat().resolvedOptions().timeZone}<br>KST Now: ${kstNow.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true })}`;
+  }
+
+  
+  function updateCountdown(kstNow) {
+    nextEventsDiv.innerHTML = "";
+    const upcoming = eventWindows.map(event => {
+      const [h, m] = event.start.split(":");
+      const startDate = new Date(kstNow);
+      startDate.setHours(+h, +m, 0);
+      const diff = startDate - kstNow;
+      return diff > 0 ? { diff, event } : null;
+    }).filter(e => e !== null).sort((a, b) => a.diff - b.diff);
+
+    if (upcoming.length > 0) {
+      const { diff, event } = upcoming[0];
+      const totalSecs = Math.floor(diff / 1000);
+      const hrs = Math.floor(totalSecs / 3600);
+      const mins = Math.floor((totalSecs % 3600) / 60);
+      const secs = totalSecs % 60;
+      countdown.textContent = `Next: ${event.name} in ${hrs}h ${mins}m ${secs}s`;
+    } else {
+      countdown.textContent = "No upcoming events today.";
+    }
+  }
+
+  
   function checkEvents() {
     const today = new Date().toISOString().split('T')[0];
     const kstNow = getKSTNow();
     const hhmm = kstNow.getHours().toString().padStart(2, '0') + ':' + kstNow.getMinutes().toString().padStart(2, '0');
 
+    let eventActive = false;
+
     for (const event of eventWindows) {
       if (hhmm >= event.start && hhmm < event.end) {
+        activeEvent.innerHTML = `<img class='alarm' src='https://i.gifer.com/ZZ5H.gif' alt='alarm'/> ${event.name}`;
         const key = today + event.start;
         if (!notifiedToday.has(key)) {
           notifiedToday.add(key);
@@ -170,12 +215,21 @@
             });
           }
         }
+        eventActive = true;
         break;
       }
     }
+
+    if (!eventActive) {
+      activeEvent.textContent = "Time Event Alert";
+    }
+
+    updateCountdown(kstNow);
   }
 
-  // Check every minute
-  setInterval(checkEvents, 60000);
-  checkEvents(); // first call
+
+  updateTimezoneInfo();
+  checkEvents();
+  setInterval(updateTimezoneInfo, 60000);
+  setInterval(checkEvents, 1000);
 </script>
