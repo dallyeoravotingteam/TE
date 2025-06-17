@@ -1,11 +1,11 @@
 const eventWindows = [
-  { start: "15:15", end: "15:20", name: "ENGLISH TE 1 ⏳09:30AM - 10:30AM KST" },
-    { start: "15:20", end: "15:30", name: "KOREAN/JAPANESE/VIETNAMESE TE 1 ⏳12:45PM - 01:45PM KST" },
-    { start: "15:30", end: "15:40", name: "CHINESE TE 1 ⏳01:45PM - 02:45PM KST" },
+  { start: "09:30", end: "10:30", name: "ENGLISH TE 1 ⏳09:30AM - 10:30AM KST" },
+    { start: "12:45", end: "13:45", name: "KOREAN/JAPANESE/VIETNAMESE TE 1 ⏳12:45PM - 01:45PM KST" },
+    { start: "13:45", end: "14:45", name: "CHINESE TE 1 ⏳01:45PM - 02:45PM KST" },
     { start: "18:30", end: "19:30", name: "KOREAN/JAPANESE/VIETNAMESE TE 2 ⏳06:30PM - 07:30PM KST" },
     { start: "19:30", end: "20:30", name: "CHINESE TE 2 ⏳07:30PM - 08:30PM KST" },
     { start: "22:50", end: "23:50", name: "ENGLISH TE 2 ⏳10:50PM - 11:50PM KST" }
-];
+  ];
 
 let notifiedTodaySW = new Set();
 
