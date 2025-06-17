@@ -1,4 +1,3 @@
-<!-- index.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -8,7 +7,10 @@
   <link rel="manifest" href="manifest.json">
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Fredoka+One&display=swap');
-    * { box-sizing: border-box; }
+    * {
+      box-sizing: border-box;
+    }
+
     body {
       margin: 0;
       font-family: 'Fredoka One', cursive;
@@ -16,6 +18,7 @@
       color: white;
       text-align: center;
     }
+
     .container {
       background-color: #d47ce2;
       margin: 2rem;
@@ -23,14 +26,28 @@
       border-radius: 1rem;
       position: relative;
     }
-    h1, h2 { margin-bottom: 1rem; }
-    .event { margin: 1rem auto; font-size: 1.5rem; }
-    .alarm { width: 50px; vertical-align: middle; margin-right: 10px; }
+
+    h1, h2 {
+      margin-bottom: 1rem;
+    }
+
+    .event {
+      margin: 1rem auto;
+      font-size: 1.5rem;
+    }
+
+    .alarm {
+      width: 50px;
+      vertical-align: middle;
+      margin-right: 10px;
+    }
+
     .top-left {
       position: absolute;
       top: 20px;
       left: 20px;
     }
+
     button {
       font-family: 'Fredoka One', cursive;
       background-color: #a838a7;
@@ -41,19 +58,41 @@
       border-radius: 1rem;
       cursor: pointer;
     }
+
     footer {
       margin-top: 3rem;
       padding: 1rem;
       background-color: #a838a7;
       font-size: 0.9rem;
     }
-    #timezone-info { margin-bottom: 1rem; }
-    .countdown-line { font-size: 1rem; margin: 0.5rem 0; }
+
+    #timezone-info {
+      margin-bottom: 1rem;
+    }
+
+    .countdown-line {
+      font-size: 1rem;
+      margin: 0.5rem 0;
+    }
+
     @media screen and (max-width: 600px) {
-      .container { margin: 1rem; padding: 1.5rem; }
-      .event { font-size: 1.25rem; }
-      .alarm { width: 40px; }
-      button.top-left { padding: 0.5rem 1rem; font-size: 0.9rem; }
+      .container {
+        margin: 1rem;
+        padding: 1.5rem;
+      }
+
+      .event {
+        font-size: 1.25rem;
+      }
+
+      .alarm {
+        width: 40px;
+      }
+
+      button.top-left {
+        padding: 0.5rem 1rem;
+        font-size: 0.9rem;
+      }
     }
   </style>
 </head>
@@ -62,10 +101,12 @@
     <button class="top-left" onclick="requestNotificationPermission()">Enable Notifications</button>
     <h1>📢 Daily Time Events</h1>
     <div id="timezone-info"></div>
+
     <div class="event" id="active-event">Time Event Alert</div>
     <div id="countdown"></div>
     <div id="next-events"></div>
   </div>
+
   <footer>
     &copy; DALLYEORA VOTING TEAM
   </footer>
