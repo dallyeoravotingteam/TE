@@ -1,6 +1,6 @@
 {
-  "name": "Time Event Alerts",
-  "short_name": "Time Alerts",
+  "name": "Time Event Notifications",
+  "short_name": "TE Alerts",
   "start_url": ".",
   "display": "standalone",
   "background_color": "#c150e2",
